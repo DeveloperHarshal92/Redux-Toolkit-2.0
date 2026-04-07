@@ -1,65 +1,86 @@
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import {
-  removeCollection,
-  removedToast,
-} from "../redux/features/collectionSlice";
+import { removeCollection, removedToast } from "../redux/features/collectionSlice";
+import { Trash2, ExternalLink, Play } from "lucide-react";
 
 const CollectionCard = ({ item }) => {
   const dispatch = useDispatch();
+  const [isHovered, setIsHovered] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const removeFromCollection = (item) => {
+  const removeFromCollection = (e, item) => {
+    e.preventDefault();
     dispatch(removeCollection(item));
     dispatch(removedToast());
   };
+
   return (
-    <div className="w-[18vw] relative h-100 bg-white rounded-2xl overflow-hidden">
-      <a className="h-full" target="_blank" href={item.url}>
-        {item.type == "photo" ? (
+    <a 
+      target="_blank" 
+      rel="noopener noreferrer" 
+      href={item.url}
+      className="group relative block rounded-2xl overflow-hidden bg-gray-200 dark:bg-gray-800 shadow-sm hover:shadow-xl transition-all duration-300 outline-none focus-visible:ring-4 focus-visible:ring-red-500/50"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Media Content */}
+      <div className={`transition-opacity duration-500 ease-in-out ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+        {item.type === "photo" ? (
           <img
-            className="h-full w-full object-cover object-center"
+            className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
             src={item.src}
-            alt=""
+            loading="lazy"
+            alt={item.title}
+            onLoad={() => setIsLoaded(true)}
           />
         ) : (
-          ""
+          <div className="relative">
+            <video
+              className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
+              autoPlay
+              loop
+              muted
+              playsInline
+              src={item.src}
+              onLoadedData={() => setIsLoaded(true)}
+            ></video>
+            {!isHovered && (
+              <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-md p-1.5 rounded-full text-white">
+                <Play size={16} fill="white" />
+              </div>
+            )}
+          </div>
         )}
-        {item.type == "video" ? (
-          <video
-            className="h-full w-full object-cover object-center"
-            autoPlay
-            loop
-            muted
-            src={item.src}
-          ></video>
-        ) : (
-          ""
-        )}
-      </a>
-      <div
-        id="bottom"
-        className="flex justify-between items-center w-full px-4 py-6 text-white absolute bottom-0 gap-3 bg-linear-to-b from-transparent to-black"
-      >
-        <h2 className="h-12 overflow-hidden text-lg font-semibold capitalize">
-          {item.title}
-        </h2>
-        <button
-          onClick={() => {
-            removeFromCollection(item);
-          }}
-          className="p-2 rounded-full cursor-pointer bg-linear-to-b from-trasparent to-black/40 active:scale-95"
-        >
-          <svg
-            className="w-6"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="rgba(255,255,255,1)"
-          >
-            <path d="M5 2H19C19.5523 2 20 2.44772 20 3V22.1433C20 22.4194 19.7761 22.6434 19.5 22.6434C19.4061 22.6434 19.314 22.6168 19.2344 22.5669L12 18.0313L4.76559 22.5669C4.53163 22.7136 4.22306 22.6429 4.07637 22.4089C4.02647 22.3293 4 22.2373 4 22.1433V3C4 2.44772 4.44772 2 5 2Z"></path>
-          </svg>
-        </button>
       </div>
-    </div>
+
+      {/* Hover Overlay Gradient */}
+      <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}></div>
+
+      {/* Hover Content */}
+      <div className={`absolute inset-0 flex flex-col justify-between p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300`}>
+        {/* Top Controls */}
+        <div className="flex justify-end gap-2 transform translate-y-[-10px] group-hover:translate-y-0 transition-transform duration-300">
+          <button
+            onClick={(e) => removeFromCollection(e, item)}
+            className="p-2.5 rounded-xl bg-white/20 hover:bg-red-500/80 backdrop-blur-md text-white transition-colors active:scale-95"
+            aria-label="Remove from collection"
+          >
+            <Trash2 size={20} />
+          </button>
+        </div>
+
+        {/* Bottom Info */}
+        <div className="transform translate-y-[10px] group-hover:translate-y-0 transition-transform duration-300">
+          <h2 className="text-white font-medium text-lg leading-tight line-clamp-2 capitalize drop-shadow-md">
+            {item.title}
+          </h2>
+          <div className="flex items-center gap-1 text-gray-300 text-sm mt-1">
+            <span>View original</span>
+            <ExternalLink size={14} />
+          </div>
+        </div>
+      </div>
+    </a>
   );
 };
 
