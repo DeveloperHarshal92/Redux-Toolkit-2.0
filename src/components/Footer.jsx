@@ -47,7 +47,7 @@ const Footer = () => {
           </a>
           <a
             target="_blank"
-            href="www.linkedin.com/in/harshal-varade-07945a3a3"
+            href="https://www.linkedin.com/in/harshal-varade-07945a3a3/"
             className="hover:text-gray-900 dark:hover:text-white transition-colors"
             aria-label="LinkedIn"
           >
